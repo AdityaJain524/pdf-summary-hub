@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { useUser } from "@clerk/clerk-react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -7,16 +6,18 @@ import { PDFUploader } from "@/components/PDFUploader";
 import { SummaryDisplay } from "@/components/SummaryDisplay";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { FileText, History, LogOut } from "lucide-react";
-import { useClerk } from "@clerk/clerk-react";
+import { ChatBot } from "@/components/ChatBot";
+import { FeedbackForm } from "@/components/FeedbackForm";
+import { FileText, History, LogOut, MessageSquare } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const Home = () => {
-  const { user } = useUser();
-  const { signOut } = useClerk();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const [showFeedback, setShowFeedback] = useState(false);
   const [summaryData, setSummaryData] = useState<{
     text: string;
     filename: string;
@@ -24,9 +25,15 @@ const Home = () => {
     wordCount: number;
   } | null>(null);
 
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.email) setUserEmail(user.email);
+    });
+  }, []);
+
   const handleSignOut = async () => {
-    await signOut();
-    navigate("/");
+    await supabase.auth.signOut();
+    navigate("/auth");
   };
 
   return (
@@ -44,6 +51,14 @@ const Home = () => {
           </div>
           
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowFeedback(true)}
+              className="rounded-full"
+            >
+              <MessageSquare className="w-5 h-5" />
+            </Button>
             <ThemeToggle />
             <Button
               variant="outline"
@@ -64,6 +79,9 @@ const Home = () => {
           </div>
         </div>
       </header>
+
+      {/* Feedback Form Modal */}
+      <FeedbackForm open={showFeedback} onOpenChange={setShowFeedback} />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-12">
@@ -90,7 +108,7 @@ const Home = () => {
 
             <Card className="p-8 shadow-lg border-border/50 backdrop-blur-sm bg-card/80">
               <PDFUploader
-                userEmail={user?.primaryEmailAddress?.emailAddress || ""}
+                userEmail={userEmail}
                 onSuccess={(data) => setSummaryData(data)}
                 onLoadingChange={setIsLoading}
               />
@@ -133,6 +151,9 @@ const Home = () => {
           </div>
         )}
       </main>
+
+      {/* Floating Chatbot */}
+      <ChatBot />
     </div>
   );
 };

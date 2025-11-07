@@ -14,12 +14,37 @@ export type Database = {
   }
   public: {
     Tables: {
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string
+          full_name: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          full_name?: string | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       summaries: {
         Row: {
           created_at: string | null
           id: string
           language: string
           original_filename: string
+          pdf_content: string | null
           summary_text: string
           updated_at: string | null
           user_email: string
@@ -30,6 +55,7 @@ export type Database = {
           id?: string
           language: string
           original_filename: string
+          pdf_content?: string | null
           summary_text: string
           updated_at?: string | null
           user_email: string
@@ -40,6 +66,7 @@ export type Database = {
           id?: string
           language?: string
           original_filename?: string
+          pdf_content?: string | null
           summary_text?: string
           updated_at?: string | null
           user_email?: string

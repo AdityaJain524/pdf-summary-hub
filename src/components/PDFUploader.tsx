@@ -89,13 +89,14 @@ export const PDFUploader = ({ userEmail, onSuccess, onLoadingChange }: PDFUpload
 
         const result = await response.json();
         
-        // Save to database
+        // Save to database with PDF content for chatbot
         const { error: dbError } = await supabase.from("summaries").insert({
           user_email: userEmail,
           original_filename: file.name,
           summary_text: result.summary,
           word_count: wordCount,
           language: language,
+          pdf_content: result.pdfContent || result.summary, // Store full PDF text or summary
         });
 
         if (dbError) throw dbError;
@@ -109,7 +110,7 @@ export const PDFUploader = ({ userEmail, onSuccess, onLoadingChange }: PDFUpload
 
         toast({
           title: "Success!",
-          description: "Your PDF has been summarized",
+          description: "Your PDF has been summarized and is ready for chat",
         });
       };
     } catch (error) {

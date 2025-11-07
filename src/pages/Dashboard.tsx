@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { useUser } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { ChatBot } from "@/components/ChatBot";
 import { FileText, ArrowLeft, Calendar, Globe, Type } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -19,24 +19,27 @@ interface Summary {
 }
 
 const Dashboard = () => {
-  const { user } = useUser();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [summaries, setSummaries] = useState<Summary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
-    if (user?.primaryEmailAddress?.emailAddress) {
-      fetchSummaries();
-    }
-  }, [user]);
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.email) {
+        setUserEmail(user.email);
+        fetchSummaries(user.email);
+      }
+    });
+  }, []);
 
-  const fetchSummaries = async () => {
+  const fetchSummaries = async (email: string) => {
     try {
       const { data, error } = await supabase
         .from("summaries")
         .select("*")
-        .eq("user_email", user?.primaryEmailAddress?.emailAddress)
+        .eq("user_email", email)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -147,6 +150,9 @@ const Dashboard = () => {
           )}
         </div>
       </main>
+
+      {/* Floating Chatbot */}
+      <ChatBot />
     </div>
   );
 };

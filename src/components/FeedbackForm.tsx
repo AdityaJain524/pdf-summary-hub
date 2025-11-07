@@ -70,7 +70,7 @@ export const FeedbackForm = ({ open, onOpenChange }: FeedbackFormProps) => {
 
     try {
       // Replace with your actual n8n webhook URL
-      const webhookUrl = "YOUR_N8N_WEBHOOK_URL";
+      const webhookUrl = "http://localhost:5678/webhook-test/7104db72-dd00-413f-8132-fddf6a0f4bf7";
       
       const response = await fetch(webhookUrl, {
         method: "POST",
